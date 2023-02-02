@@ -4,6 +4,7 @@ import sqlite3
 import os
 from pathlib import Path
 # from tkinter import *
+from PIL import Image
 from tkinter import ttk
 import pickle
 import customtkinter
@@ -21,7 +22,13 @@ favorites = [bs_1, bs_2, bs_3, ks_1, fs_1]
 
 filename = 'Favorites.pk'
 
+# "S:\Python\Code\ShocksScraper\images\white_heart_test.png"
 
+image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
+print(image_path)
+# logo_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "image_icon_light.png")), size=(26, 26))
+heart_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "white_heart.png")), size=(26, 26))
+unfave_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "heart_x.png")), size=(26, 26))
 
 # def update_fave():
 #     with open(filename, 'wb') as fi:
@@ -32,19 +39,27 @@ filename = 'Favorites.pk'
 # update_fave()
 
 
-def combobox_callback(choice):
-    print("combobox dropdown clicked:", choice)
+#
+# def combobox_callback(choice):
+#     print("combobox dropdown clicked:", choice)
 
 
 def search_part(num):
     print(num)
 
+
 def add_fav(num):
     favorites.append(num)
+    print(favorites)
     # update_fave()
 
+
 def sub_fav(num):
-    favorites.remove(num)
+    try:
+        favorites.remove(num)
+
+    except ValueError:
+        pass
     # update_fave()
 
 height_var = 50
@@ -57,17 +72,10 @@ class Shock_Search(CTk):
     def __init__(self, *args, **kwargs):
         CTk.__init__(self, *args, **kwargs)
 
-        # def search_part():
-        #     num = search_combo.get()
-        #     print(num)
-        #
-        # def add_favorite():
-
-
         # Root Frame
         self.title('Shock Search')
         self.geometry('1100x600')
-        customtkinter.set_appearance_mode("light")
+        # customtkinter.set_appearance_mode("light")
         customtkinter.set_default_color_theme("green")
 
         search_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
@@ -75,13 +83,14 @@ class Shock_Search(CTk):
 
         combobox_var = StringVar(value="Search Part Number")
 
-        search_favorite = CTkButton(search_frame, height=height_var, width=60, text='heart', command=lambda: add_fav(search_combo.get()))
-        search_unfavorite = CTkButton(search_frame, height=height_var, width=60, text='unheart', command=lambda: sub_fav(search_combo.get()))
+        search_unfavorite = CTkButton(search_frame, height=height_var, width=60, text='', image=unfave_image, command=lambda: sub_fav(search_combo.get()))
+        search_favorite = CTkButton(search_frame, height=height_var, width=60, text='', image=heart_image, command=lambda: add_fav(search_combo.get()))
         search_combo = CTkComboBox(search_frame, values=favorites, height=height_var, width=550, variable=combobox_var)
-        search_button = CTkButton(search_frame, height=height_var, width=100, text='Search', command=lambda: search_part(search_combo.get()))
+        search_button = CTkButton(search_frame, height=height_var, width=100, text='Search', font=('Helvetica', 15), command=lambda: search_part(search_combo.get()))
 
-        search_favorite.grid(row=0, column=0, padx=x_pad_1)
-        search_unfavorite.grid(row=0, column=1, padx=x_pad_1)
+
+        search_unfavorite.grid(row=0, column=0, padx=x_pad_1)
+        search_favorite.grid(row=0, column=1, padx=x_pad_1)
         search_combo.grid(row=0, column=2, padx=x_pad_1)
         search_button.grid(row=0, column=3, padx=x_pad_1)
 
@@ -107,6 +116,19 @@ class Shock_Search(CTk):
 
         shocks_tree.pack()
 
+        #Theme frame
+        theme_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
+        theme_frame.pack(side=BOTTOM)
+
+        appearance_mode_menu = CTkOptionMenu(theme_frame,
+                                             values=["System", "Light", "Dark"],
+                                             command=self.change_appearance_mode_event
+                                             )
+        appearance_mode_menu.grid(row=0, column=0, padx=20, pady=20, sticky="w")
+
+
+    def change_appearance_mode_event(self, new_appearance_mode):
+        customtkinter.set_appearance_mode(new_appearance_mode)
 
 
 app = Shock_Search()
