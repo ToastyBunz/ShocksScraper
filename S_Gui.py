@@ -9,6 +9,7 @@ from tkinter import ttk
 import pickle
 import customtkinter
 from customtkinter import *
+import bilstein
 
 # bs_1 = '24-238304'
 # bs_2 = '24-186728'
@@ -37,8 +38,7 @@ except FileNotFoundError:
 
 
 
-def search_part(num):
-    print(num)
+
 
 
 def add_fav(num):
@@ -76,10 +76,24 @@ class Shock_Search(CTk):
 
         combobox_var = StringVar(value="Search Part Number")
 
+        shocks_tree = ttk.Treeview(self)
+
+        def search_part(num):
+            print(num)
+            output = bilstein.searchBilstein(num)
+            print(output)
+            if (not "error" in output.keys()) :
+                output_tuple = (output.get("distributor"), output.get("price"), output.get("stock"), output.get("link"))
+                shocks_tree.insert(parent='', index='end', iid='0', text='', values=output_tuple)
+                return output_tuple
+            else :
+                return null
+            print(num)
+
         search_unfavorite = CTkButton(search_frame, height=height_var, width=60, text='', image=unfave_image, command=lambda: sub_fav(search_combo.get()))
         search_favorite = CTkButton(search_frame, height=height_var, width=60, text='', image=heart_image, command=lambda: add_fav(search_combo.get()))
         search_combo = CTkComboBox(search_frame, values=fav_list, height=height_var, width=550, variable=combobox_var)
-        search_button = CTkButton(search_frame, height=height_var, width=100, text='Search', font=('Helvetica', 15), command=lambda: search_part(search_combo.get()))
+        search_button = CTkButton(search_frame, height=height_var, width=100, text='Search', font=('Helvetica', 15), command=lambda: search_part("24-238304"))#search_combo.get()))
 
 
         search_unfavorite.grid(row=0, column=0, padx=x_pad_1)
@@ -87,7 +101,7 @@ class Shock_Search(CTk):
         search_combo.grid(row=0, column=2, padx=x_pad_1)
         search_button.grid(row=0, column=3, padx=x_pad_1)
 
-        shocks_tree = ttk.Treeview(self)
+
 
         shocks_tree['columns'] = ('Distributor', 'Price', "In Stock", 'Link')
 
@@ -105,7 +119,7 @@ class Shock_Search(CTk):
         shocks_tree.heading("In Stock", text="In Stock", anchor='w')
         shocks_tree.heading("Link", text="Link", anchor='w')
 
-        shocks_tree.insert(parent='', index='end', iid='0', text='', values=("Bernstein", 113, 1000, 'https://cart.bilsteinus.com'))
+        
 
         shocks_tree.pack()
 
