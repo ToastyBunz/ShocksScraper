@@ -10,38 +10,31 @@ import pickle
 import customtkinter
 from customtkinter import *
 
-bs_1 = '24-238304'
-bs_2 = '24-186728'
-bs_3 = '47-310971'
+# bs_1 = '24-238304'
+# bs_2 = '24-186728'
+# bs_3 = '47-310971'
+#
+# ks_1 = '25001-397A'
+# fs_1 = '883-06-132'
+#
+# favorites = [bs_1, bs_2, bs_3, ks_1, fs_1]
 
-ks_1 = '25001-397A'
-
-fs_1 = '883-06-132'
-
-favorites = [bs_1, bs_2, bs_3, ks_1, fs_1]
+fav_list = []
 
 filename = 'Favorites.pk'
 
-# "S:\Python\Code\ShocksScraper\images\white_heart_test.png"
-
 image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
-print(image_path)
-# logo_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "image_icon_light.png")), size=(26, 26))
+
 heart_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "white_heart.png")), size=(26, 26))
 unfave_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "heart_x.png")), size=(26, 26))
 
-# def update_fave():
-#     with open(filename, 'wb') as fi:
-#         # dump your data into the file
-#         pickle.dumps(favorites, fi)
-#
-#
-# update_fave()
+try:
+    with open(filename, 'rb+') as fav_parts:
+        fav_list=pickle.load(fav_parts)
 
+except FileNotFoundError:
+    pass
 
-#
-# def combobox_callback(choice):
-#     print("combobox dropdown clicked:", choice)
 
 
 def search_part(num):
@@ -49,14 +42,14 @@ def search_part(num):
 
 
 def add_fav(num):
-    favorites.append(num)
-    print(favorites)
+    fav_list.append(num)
+    print(fav_list)
     # update_fave()
 
 
 def sub_fav(num):
     try:
-        favorites.remove(num)
+        fav_list.remove(num)
 
     except ValueError:
         pass
@@ -85,7 +78,7 @@ class Shock_Search(CTk):
 
         search_unfavorite = CTkButton(search_frame, height=height_var, width=60, text='', image=unfave_image, command=lambda: sub_fav(search_combo.get()))
         search_favorite = CTkButton(search_frame, height=height_var, width=60, text='', image=heart_image, command=lambda: add_fav(search_combo.get()))
-        search_combo = CTkComboBox(search_frame, values=favorites, height=height_var, width=550, variable=combobox_var)
+        search_combo = CTkComboBox(search_frame, values=fav_list, height=height_var, width=550, variable=combobox_var)
         search_button = CTkButton(search_frame, height=height_var, width=100, text='Search', font=('Helvetica', 15), command=lambda: search_part(search_combo.get()))
 
 
@@ -133,3 +126,7 @@ class Shock_Search(CTk):
 
 app = Shock_Search()
 app.mainloop()
+
+with open(filename, 'wb') as fav_parts:
+    pickle.dump(fav_list, fav_parts)
+
