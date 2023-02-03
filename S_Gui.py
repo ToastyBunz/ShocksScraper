@@ -10,6 +10,7 @@ import pickle
 import customtkinter
 from customtkinter import *
 import bilstein
+import meyer
 
 # bs_1 = '24-238304'
 # bs_2 = '24-186728'
@@ -80,14 +81,17 @@ class Shock_Search(CTk):
 
         def search_part(num):
             print(num)
-            output = bilstein.searchBilstein(num)
+            output = meyer.searchMeyer(num)
             print(output)
             if (not "error" in output.keys()) :
                 output_tuple = (output.get("distributor"), output.get("price"), output.get("stock"), output.get("link"))
                 shocks_tree.insert(parent='', index='end', iid='0', text='', values=output_tuple)
-                return output_tuple
-            else :
-                return null
+            output = bilstein.searchBilstein(num)
+            print(output)
+            if (not "error" in output.keys()) :
+                output_tuple = (output.get("distributor"), output.get("price"), output.get("stock"), output.get("link"))
+                shocks_tree.insert(parent='', index='end', iid='1', text='', values=output_tuple)
+            
             print(num)
 
         search_unfavorite = CTkButton(search_frame, height=height_var, width=60, text='', image=unfave_image, command=lambda: sub_fav(search_combo.get()))

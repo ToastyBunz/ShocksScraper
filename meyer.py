@@ -11,7 +11,7 @@ import json
 import os 
 
 URL = "https://cart.bilsteinus.com/details?id=300287396269458499"
-HEADERS = {'User-Agent': 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'}
+HEADERS = {}
 options = Options()
 options.headless=False
 #options.add_argument('--headless=false')
@@ -20,13 +20,24 @@ driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager()
 s = requests.Session()
 def loginMeyer() :
     # Login with the user session
-
+    global HEADERS
     driver.get("https://online.meyerdistributing.com/public/login")
     username = driver.find_element(by=By.XPATH, value='//*[@id="username"]/input')
     username.send_keys(os.environ.get("MEYER_USER"))
     password = driver.find_element(by=By.XPATH, value='//*[@id="password"]/input')
     password.send_keys(os.environ.get("MEYER_PASS")+'\n')
     password.submit()
+    loginCheckRequest = driver.wait_for_request("/api/user/v3/logged-in/")
+    #print(loginCheckRequest.headers)
+    HEADERS = loginCheckRequest.headers
+    #print(HEADERS)
+    # Create a request interceptor
+    def interceptor(request):
+        del request.headers['Authorization']  # Delete the header first
+        request.headers['Authorization'] = HEADERS["Authorization"]
+
+    # Set the interceptor on the driver
+    driver.request_interceptor = interceptor
     cookies = driver.get_cookies()
     
     for cookie in cookies:
@@ -42,14 +53,35 @@ def loginMeyer() :
     # TODO wait for redirect?
 '''
 
-def searchBilstein(partNumber):
+def searchMeyer(partNumber):
     print(
         "Searching Meyer for " + partNumber
     )
-    print()
-    driver.get('https://online.meyerdistributing.com/api/search/autocomplete/all?search=' + partNumber)
-    while(True):
-        continue
+    print(HEADERS['Authorization'])
+    searchRequest = s.get('https://online.meyerdistributing.com/api/search/autocomplete/all?search=' + partNumber, headers=HEADERS)
+    if(searchRequest.status_code != 200) :
+        return {"error": "Part number search request failed"}
+    search = searchRequest.json()
+    #search should be a array
+    #TODO check size
+    print(search[0])
+    bestMatch=search[0]
+    urlValue = bestMatch.get("urlValue")
+
+    partRequest = s.get('https://online.meyerdistributing.com/api/part/inquiry/'+ urlValue, headers=HEADERS)
+
+    partDetails = partRequest.json().get("details")
+    price = partDetails.get("customerPrice")
+    stock = partDetails.get("totalStock")
+
+    return {
+        'distributor': "Meyer",
+        'price': price,
+        'stock': stock,
+        'link': 'https://online.meyerdistributing.com/parts/details/' + partNumber
+    }
+
+    #driver.get('https://online.meyerdistributing.com/parts/search;search=' + partNumber)
        # TODO status code check
     '''
     products = json.loads(r.json()).get("Products")
@@ -94,6 +126,6 @@ def searchBilstein(partNumber):
     }'''
 
 loginMeyer()
-searchBilstein("BIL33-225487")
+#searchMeyer("123")
 #searchBilstein("CC-11125")
 
