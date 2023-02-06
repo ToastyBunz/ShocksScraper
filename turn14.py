@@ -14,57 +14,46 @@ HEADERS = {}
 options = Options()
 options.headless=False
 #options.add_argument('--headless=false')
-options.add_argument("--window-size=1920,1200")
 options.add_argument('--blink-settings=imagesEnabled=false')
+options.add_argument("--window-size=1920,1200")
 driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
 s = requests.Session()
-def loginMeyer() :
+def loginTurn14() :
     # Login with the user session
     global HEADERS
-    driver.get("https://online.meyerdistributing.com/public/login")
-    username = driver.find_element(by=By.XPATH, value='//*[@id="username"]/input')
-    username.send_keys(os.environ.get("MEYER_USER"))
-    password = driver.find_element(by=By.XPATH, value='//*[@id="password"]/input')
-    password.send_keys(os.environ.get("MEYER_PASS")+'\n')
-    password.submit()
-    loginCheckRequest = driver.wait_for_request("/api/user/v3/logged-in/")
-    #print(loginCheckRequest.headers)
-    HEADERS = loginCheckRequest.headers
-    #print(HEADERS)
-    # Create a request interceptor
-    def interceptor(request):
-        del request.headers['Authorization']  # Delete the header first
-        request.headers['Authorization'] = HEADERS["Authorization"]
-
-    # Set the interceptor on the driver
-    driver.request_interceptor = interceptor
+    driver.get("https://turn14.com/index.php")
+    username = driver.find_element(by=By.NAME, value='username')
+    username.send_keys(os.environ.get("TURN14_USER"))
+    password = driver.find_element(by=By.NAME, value='password')
+    password.send_keys(os.environ.get("TURN14_PASS")+'\n')
     cookies = driver.get_cookies()
     
     for cookie in cookies:
         s.cookies.set(cookie['name'], cookie['value'])
-
-'''
     
-    password = driver.find_element(by=By.ID, value='dnn_ctr_Login_Login_DNN_txtPassword')
-    password.send_keys(os.environ.get("BILSTEIN_PASS"))
-    loginButton = driver.find_element(by=By.ID, value='dnn_ctr_Login_Login_DNN_cmdLogin')
-    loginButton.click()
-    expectedUrl = "https://cart.bilsteinus.com"
-    # TODO wait for redirect?
-'''
 
-def searchMeyer(partNumber):
+def searchTurn14(partNumber):
     print(
         "Searching Meyer for " + partNumber
     )
-    print(HEADERS['Authorization'])
-    searchRequest = s.get('https://online.meyerdistributing.com/api/search/autocomplete/all?search=' + partNumber, headers=HEADERS)
+    searchRequest = s.get('https://turn14.com/ajax_scripts/vmm_autocomplete.php?action=partnumber&term=' + partNumber)
     if(searchRequest.status_code != 200) :
         return {"error": "Part number search request failed"}
     search = searchRequest.json()
     #search should be a array
     #TODO check size
     print(search[0])
+    part = search[0].get("label")
+    itemcode=search[0].get("itemcode")
+    driver.get('https://turn14.com/search/index.php?vmmPart='+part)
+
+    stock = driver.find_element(by=By.XPATH, value='//div[@data-itemcode="'+itemcode+'"]//div[2]')
+    print("div:" , stock.text)
+
+    while True:
+        continue
+    #https://turn14.com/search/index.php?vmmPart=bil24-238304
+    '''
     bestMatch=search[0]
     urlValue = bestMatch.get("urlValue")
 
@@ -80,8 +69,9 @@ def searchMeyer(partNumber):
         'stock': stock,
         'link': 'https://online.meyerdistributing.com/parts/details/' + partNumber
     }
+'''
 
-loginMeyer()
-#searchMeyer("123")
+loginTurn14()
+searchTurn14("24-238304")
 #searchBilstein("CC-11125")
 

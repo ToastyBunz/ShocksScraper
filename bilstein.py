@@ -16,6 +16,7 @@ options = Options()
 options.headless = False
 #options.add_argument('--headless')
 options.add_argument("--window-size=1920,1200")
+options.add_argument('--blink-settings=imagesEnabled=false')
 driver = webdriver.Chrome(options=options, service=Service(ChromeDriverManager().install()))
 s = requests.Session()
 loggedin = False
