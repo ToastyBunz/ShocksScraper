@@ -45,31 +45,19 @@ def searchTurn14(partNumber):
     print(search[0])
     part = search[0].get("label")
     itemcode=search[0].get("itemcode")
-    driver.get('https://turn14.com/search/index.php?vmmPart='+part)
+    parturl = 'https://turn14.com/search/index.php?vmmPart='+part
+    driver.get(parturl)
 
-    stock = driver.find_element(by=By.XPATH, value='//div[@data-itemcode="'+itemcode+'"]//div[2]')
-    print("div:" , stock.text)
-
-    while True:
-        continue
-    #https://turn14.com/search/index.php?vmmPart=bil24-238304
-    '''
-    bestMatch=search[0]
-    urlValue = bestMatch.get("urlValue")
-
-    partRequest = s.get('https://online.meyerdistributing.com/api/part/inquiry/'+ urlValue, headers=HEADERS)
-
-    partDetails = partRequest.json().get("details")
-    price = partDetails.get("customerPrice")
-    stock = partDetails.get("totalStock")
-
+    stock = driver.find_element(by=By.XPATH, value='//div[@data-itemcode="'+itemcode+'"]/div[2]/span[contains(@class,"stock-line")]')
+    stockline = stock.text #1457 In Stock (305 PA | 0 TX | 1152 NV)
+    price = driver.find_element(by=By.XPATH, value='//div[@data-itemcode="'+itemcode+'"]//span[contains(@class,"amount")]')
+    priceline = price.text
     return {
-        'distributor': "Meyer",
-        'price': price,
-        'stock': stock,
-        'link': 'https://online.meyerdistributing.com/parts/details/' + partNumber
+        'distributor': "Turn14",
+        'price': priceline,
+        'stock': stockline,
+        'link': parturl
     }
-'''
 
 loginTurn14()
 searchTurn14("24-238304")

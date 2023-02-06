@@ -11,6 +11,7 @@ import customtkinter
 from customtkinter import *
 import bilstein
 import meyer
+import turn14
 
 # bs_1 = '24-238304'
 # bs_2 = '24-186728'
@@ -80,17 +81,42 @@ class Shock_Search(CTk):
         shocks_tree = ttk.Treeview(self)
 
         def search_part(num):
+            results = []
+            hasBilstein = False
+            hasMeyer = False
+            hasTurn14 = False
             print(num)
-            output = meyer.searchMeyer(num)
-            print(output)
-            if (not "error" in output.keys()) :
-                output_tuple = (output.get("distributor"), output.get("price"), output.get("stock"), output.get("link"))
-                shocks_tree.insert(parent='', index='end', iid='0', text='', values=output_tuple)
-            output = bilstein.searchBilstein(num)
-            print(output)
-            if (not "error" in output.keys()) :
-                output_tuple = (output.get("distributor"), output.get("price"), output.get("stock"), output.get("link"))
-                shocks_tree.insert(parent='', index='end', iid='1', text='', values=output_tuple)
+            bilstein_output = bilstein.searchBilstein(num)
+            print(bilstein_output)
+            if (not "error" in bilstein_output.keys()) :
+                bilstein_output_tuple = (
+                    bilstein_output.get("distributor"),
+                    bilstein_output.get("price"),
+                    bilstein_output.get("stock"),
+                    bilstein_output.get("link"))
+                results.append(bilstein_output_tuple)
+                
+            meyer_output = meyer.searchMeyer(num)
+            print(meyer_output)
+            if (not "error" in meyer_output.keys()) :
+                meyer_output_tuple = (
+                    meyer_output.get("distributor"),
+                    meyer_output.get("price"),
+                    meyer_output.get("stock"),
+                    meyer_output.get("link"))
+                results.append(meyer_output_tuple)
+            turn14_output = turn14.searchTurn14(num)
+            print(turn14_output)
+            if (not "error" in turn14_output.keys()) :
+                turn14_output_tuple = (
+                    turn14_output.get("distributor"),
+                    turn14_output.get("price"),
+                    turn14_output.get("stock"),
+                    turn14_output.get("link"))
+                results.append(turn14_output_tuple)
+            
+            for result in range(len(results)) :
+                shocks_tree.insert(parent='', index='end', iid=str(result), text='', values=results[result])
             
             print(num)
 
