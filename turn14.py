@@ -60,6 +60,4 @@ def searchTurn14(partNumber):
     }
 
 loginTurn14()
-searchTurn14("24-238304")
-#searchBilstein("CC-11125")
 
