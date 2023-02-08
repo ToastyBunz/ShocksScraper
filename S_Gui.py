@@ -1,4 +1,6 @@
 import tkinter
+from tkinter import Tk
+from tkinter import messagebox
 import pandas as pd
 import sqlite3
 import os
@@ -9,17 +11,20 @@ from tkinter import ttk
 import pickle
 import customtkinter
 from customtkinter import *
+import bilstein
+import meyer
+import turn14
 
-# bs_1 = '24-238304'
-# bs_2 = '24-186728'
-# bs_3 = '47-310971'
-#
-# ks_1 = '25001-397A'
-# fs_1 = '883-06-132'
-#
-# favorites = [bs_1, bs_2, bs_3, ks_1, fs_1]
+bs_1 = '24-238304'
+bs_2 = '24-186728'
+bs_3 = '47-310971'
 
-fav_list = []
+ks_1 = '25001-397A'
+fs_1 = '883-06-132'
+
+favorites = [bs_1, bs_2, bs_3, ks_1, fs_1]
+
+# fav_list = []
 
 filename = 'Favorites.pk'
 
@@ -27,18 +32,14 @@ image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
 
 heart_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "white_heart.png")), size=(26, 26))
 unfave_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "heart_x.png")), size=(26, 26))
+excel_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "Excel-Logo.png")), size=(360, 136))
 
 try:
     with open(filename, 'rb+') as fav_parts:
-        fav_list=pickle.load(fav_parts)
+        fav_list = pickle.load(fav_parts)
 
 except FileNotFoundError:
     pass
-
-
-
-def search_part(num):
-    print(num)
 
 
 def add_fav(num):
@@ -55,11 +56,33 @@ def sub_fav(num):
         pass
     # update_fave()
 
+
+def clear_treeview(tree):
+    for item in tree.get_children():
+        tree.delete(item)
+
+
+def clipboard_link(tree, self):
+    y = tree.focus()
+    values = tree.item(y, 'values')
+    link = values[3]
+    tkinter.Tk.clipboard_clear(self)
+    tkinter.Tk.clipboard_append(self, string=link)
+    tkinter.Tk.update(self)
+
+
+def open_product_link():
+    messagebox.showerror(title='Missing Field ', message="No internet")
+
+
+tree_width = 150
+
 height_var = 50
 width_var = 60
 
 x_pad_1 = 5
 y_pad_1 = 10
+
 
 class Shock_Search(CTk):
     def __init__(self, *args, **kwargs):
@@ -67,37 +90,89 @@ class Shock_Search(CTk):
 
         # Root Frame
         self.title('Shock Search')
-        self.geometry('1100x600')
+        self.geometry('1366x768')
         # customtkinter.set_appearance_mode("light")
         customtkinter.set_default_color_theme("green")
 
+        logo_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
+        quasar_label = CTkLabel(logo_frame, text="In collaboration with QUASAR", compound="left",
+                                font=CTkFont(size=15, weight="bold"))
+
+        excel_label = customtkinter.CTkLabel(logo_frame, text="", image=excel_image)
+
+        excel_label.pack()
+        quasar_label.pack()
+        logo_frame.pack(pady=(30, 0))
+
         search_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
-        search_frame.pack(pady=60)
+        search_frame.pack(pady=30)
 
         combobox_var = StringVar(value="Search Part Number")
 
-        search_unfavorite = CTkButton(search_frame, height=height_var, width=60, text='', image=unfave_image, command=lambda: sub_fav(search_combo.get()))
-        search_favorite = CTkButton(search_frame, height=height_var, width=60, text='', image=heart_image, command=lambda: add_fav(search_combo.get()))
-        search_combo = CTkComboBox(search_frame, values=fav_list, height=height_var, width=550, variable=combobox_var)
-        search_button = CTkButton(search_frame, height=height_var, width=100, text='Search', font=('Helvetica', 15), command=lambda: search_part(search_combo.get()))
+        shocks_tree = ttk.Treeview(self)
 
+        def search_part(num):
+            results = []
+            hasBilstein = False
+            hasMeyer = False
+            hasTurn14 = False
+            print(num)
+            bilstein_output = bilstein.searchBilstein(num)
+            print(bilstein_output)
+            if (not "error" in bilstein_output.keys()):
+                bilstein_output_tuple = (
+                    bilstein_output.get("distributor"),
+                    bilstein_output.get("price"),
+                    bilstein_output.get("stock"),
+                    bilstein_output.get("link"))
+                results.append(bilstein_output_tuple)
+
+            meyer_output = meyer.searchMeyer(num)
+            print(meyer_output)
+            if (not "error" in meyer_output.keys()):
+                meyer_output_tuple = (
+                    meyer_output.get("distributor"),
+                    meyer_output.get("price"),
+                    meyer_output.get("stock"),
+                    meyer_output.get("link"))
+                results.append(meyer_output_tuple)
+            turn14_output = turn14.searchTurn14(num)
+            print(turn14_output)
+            if (not "error" in turn14_output.keys()):
+                turn14_output_tuple = (
+                    turn14_output.get("distributor"),
+                    turn14_output.get("price"),
+                    turn14_output.get("stock"),
+                    turn14_output.get("link"))
+                results.append(turn14_output_tuple)
+
+            clear_treeview(shocks_tree)
+
+            for result in range(len(results)):
+                shocks_tree.insert(parent='', index='end', iid=str(result), text='', values=results[result])
+
+            print(num)
+
+        search_unfavorite = CTkButton(search_frame, height=height_var, width=60, text='', image=unfave_image,
+                                      command=lambda: sub_fav(search_combo.get()))
+        search_favorite = CTkButton(search_frame, height=height_var, width=60, text='', image=heart_image,
+                                    command=lambda: add_fav(search_combo.get()))
+        search_combo = CTkComboBox(search_frame, values=fav_list, height=height_var, width=550, variable=combobox_var)
+        search_button = CTkButton(search_frame, height=height_var, width=100, text='Search', font=('Helvetica', 15),
+                                  command=lambda: search_part(search_combo.get()))  # search_combo.get()))
 
         search_unfavorite.grid(row=0, column=0, padx=x_pad_1)
         search_favorite.grid(row=0, column=1, padx=x_pad_1)
         search_combo.grid(row=0, column=2, padx=x_pad_1)
         search_button.grid(row=0, column=3, padx=x_pad_1)
 
-        shocks_tree = ttk.Treeview(self)
-
         shocks_tree['columns'] = ('Distributor', 'Price', "In Stock", 'Link')
 
-
         shocks_tree.column('#0', width=0, stretch=NO)
-        shocks_tree.column("Distributor", anchor='w')
-        shocks_tree.column("Price", anchor='w')
-        shocks_tree.column("In Stock", anchor='w')
-        shocks_tree.column("Link", anchor='w')
-
+        shocks_tree.column("Distributor", anchor='w', width=tree_width)
+        shocks_tree.column("Price", anchor='w', width=tree_width)
+        shocks_tree.column("In Stock", anchor='w', width=280)
+        shocks_tree.column("Link", anchor='w', width=380)
 
         shocks_tree.heading("#0", text="", anchor='w')
         shocks_tree.heading("Distributor", text="Distributor", anchor='w')
@@ -105,11 +180,22 @@ class Shock_Search(CTk):
         shocks_tree.heading("In Stock", text="In Stock", anchor='w')
         shocks_tree.heading("Link", text="Link", anchor='w')
 
-        shocks_tree.insert(parent='', index='end', iid='0', text='', values=("Bernstein", 113, 1000, 'https://cart.bilsteinus.com'))
-
         shocks_tree.pack()
 
-        #Theme frame
+        # link frame
+        link_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
+        link_frame.pack()
+
+        link_button = CTkButton(link_frame, height=height_var, width=60, text='Save link to clipboard',
+                                command=lambda: clipboard_link(shocks_tree, self))
+
+        openpage_button = CTkButton(link_frame, height=height_var, width=60, text='Open Selected Webpage',
+                                    command=lambda: open_product_link())
+
+        link_button.grid(row=0, column=0, padx=20, pady=20, sticky="e")
+        openpage_button.grid(row=0, column=1, padx=20, pady=20, sticky="e")
+
+        # Theme frame
         theme_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
         theme_frame.pack(side=BOTTOM)
 
@@ -118,7 +204,6 @@ class Shock_Search(CTk):
                                              command=self.change_appearance_mode_event
                                              )
         appearance_mode_menu.grid(row=0, column=0, padx=20, pady=20, sticky="w")
-
 
     def change_appearance_mode_event(self, new_appearance_mode):
         customtkinter.set_appearance_mode(new_appearance_mode)
