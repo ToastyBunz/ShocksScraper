@@ -1,5 +1,6 @@
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
@@ -10,7 +11,6 @@ import requests
 import json
 import os 
 
-HEADERS = {}
 options = Options()
 options.headless=False
 #options.add_argument('--headless=false')
@@ -21,8 +21,12 @@ s = requests.Session()
 def loginTurn14() :
     # Login with the user session
     global HEADERS
-    driver.get("https://turn14.com/index.php")
-    username = driver.find_element(by=By.NAME, value='username')
+    loginRequest = driver.get("https://turn14.com/index.php")
+    try :
+        username = driver.find_element(by=By.NAME, value='username')
+    except NoSuchElementException as e:
+        print("Cannot find username input for Turn14!")
+        return
     username.send_keys(os.environ.get("TURN14_USER"))
     password = driver.find_element(by=By.NAME, value='password')
     password.send_keys(os.environ.get("TURN14_PASS")+'\n')
