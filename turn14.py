@@ -41,7 +41,7 @@ def login() :
     for cookie in cookies:
         s.cookies.set(cookie['name'], cookie['value'])
     loginCheckRequest = s.get('https://turn14.com/search/index.php')
-    if (loginCheckRequest != 200) :
+    if (loginCheckRequest.status_code != 200) :
         return {'error': 'Login failed, check credentials'}
       
     apiTokenReturnVal = _updateAPIToken()
