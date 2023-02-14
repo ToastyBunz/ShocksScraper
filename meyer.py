@@ -29,11 +29,11 @@ def login() :
     password = driver.find_element(by=By.XPATH, value='//*[@id="password"]/input')
     password.send_keys(os.environ.get("MEYER_PASS")+'\n')
     password.submit()
-    WebDriverWait(driver, 5)
-    driver.get("https://online.meyerdistributing.com/contact-us")
+    # WebDriverWait(driver, 5)
+    # driver.get("https://online.meyerdistributing.com/contact-us")
     loginCheckRequest = driver.wait_for_request("/api/user/v3/logged-in/")
-    if (loginCheckRequest.response.status_code != 200) :
-        return {'error': 'Login failed, check credentials'}
+    # if (loginCheckRequest.response.status_code != 200) :
+    #     return {'error': 'Login failed, check credentials'}
     #print(loginCheckRequest.headers)
     HEADERS = loginCheckRequest.headers
     
