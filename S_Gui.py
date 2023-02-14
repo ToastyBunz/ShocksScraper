@@ -14,13 +14,19 @@ from customtkinter import *
 import bilstein
 import meyer
 import turn14
+from concurrent.futures import ThreadPoolExecutor, wait
+import re
+import traceback
 
+price_match_regex = "(\d+\.\d{2})\d+"
 bs_1 = '24-238304'
 bs_2 = '24-186728'
 bs_3 = '47-310971'
 
 ks_1 = '25001-397A'
 fs_1 = '883-06-132'
+print(re.search(price_match_regex, "$94.120000").group(1))
+
 
 favorites = [bs_1, bs_2, bs_3, ks_1, fs_1]
 
@@ -41,6 +47,12 @@ try:
 except FileNotFoundError:
     pass
 
+# loginFutures = []
+# with ThreadPoolExecutor() as executor:    
+#     #loginFutures.append(executor.submit(bilstein.loginBilstein))
+#     loginFutures.append(executor.submit(meyer.loginMeyer))
+#     loginFutures.append(executor.submit(turn14.loginTurn14))
+# wait(loginFutures)
 
 def add_fav(num):
     fav_list.append(num)
@@ -112,43 +124,63 @@ class Shock_Search(CTk):
         shocks_tree = ttk.Treeview(self)
 
         def search_part(num):
+            if (len(num) == 0) :
+                return
             results = []
-            hasBilstein = False
-            hasMeyer = False
-            hasTurn14 = False
             print(num)
-            bilstein_output = bilstein.searchBilstein(num)
-            print(bilstein_output)
-            if (not "error" in bilstein_output.keys()):
-                bilstein_output_tuple = (
-                    bilstein_output.get("distributor"),
-                    bilstein_output.get("price"),
-                    bilstein_output.get("stock"),
-                    bilstein_output.get("link"))
-                results.append(bilstein_output_tuple)
+            try:
+                bilstein_output = bilstein.search(num)
+                print(bilstein_output)
+                if (not "error" in bilstein_output.keys()):
+                    bilstein_output_tuple = (
+                        bilstein_output.get("distributor"),
+                        bilstein_output.get("price"),
+                        bilstein_output.get("stock"),
+                        bilstein_output.get("link"))
+                    results.append(bilstein_output_tuple)
+                else:
+                    results.append(("Bilstein", "--", "--", bilstein_output.get("error")))
+            except Exception as e:
+                results.append(("Bilstein", "--", "--", str(e) + e.__traceback__.__str__()))
+                traceback.print_exc()
 
-            meyer_output = meyer.searchMeyer(num)
-            print(meyer_output)
-            if (not "error" in meyer_output.keys()):
-                meyer_output_tuple = (
-                    meyer_output.get("distributor"),
-                    meyer_output.get("price"),
-                    meyer_output.get("stock"),
-                    meyer_output.get("link"))
-                results.append(meyer_output_tuple)
-            turn14_output = turn14.searchTurn14(num)
-            print(turn14_output)
-            if (not "error" in turn14_output.keys()):
-                turn14_output_tuple = (
-                    turn14_output.get("distributor"),
-                    turn14_output.get("price"),
-                    turn14_output.get("stock"),
-                    turn14_output.get("link"))
-                results.append(turn14_output_tuple)
-
+            try:
+                meyer_output = meyer.search(num)
+                print(meyer_output)
+                if (not "error" in meyer_output.keys()):
+                    meyer_output_tuple = (
+                        meyer_output.get("distributor"),
+                        meyer_output.get("price"),
+                        meyer_output.get("stock"),
+                        meyer_output.get("link"))
+                    results.append(meyer_output_tuple)
+                else:
+                    results.append(("Meyer", "--", "--", meyer_output.get("error")))
+            except Exception as e:
+                results.append(("Meyer", "--", "--", str(e) + str(e.__traceback__)))
+                traceback.print_exc()
+            try:
+                turn14_output = turn14.search(num)
+                print(turn14_output)
+                if (not "error" in turn14_output.keys()):
+                    turn14_output_tuple = (
+                        turn14_output.get("distributor"),
+                        turn14_output.get("price"),
+                        turn14_output.get("stock"),
+                        turn14_output.get("link"))
+                    results.append(turn14_output_tuple)
+                else:
+                    results.append(("Turn14", "--", "--", turn14_output.get("error")))
+            except Exception as e:
+                results.append(("Turn14", "--", "--", str(e) + str(e.__traceback__)))
+                traceback.print_exc()
             clear_treeview(shocks_tree)
 
             for result in range(len(results)):
+                # cleanPrice = results[result][1]
+                # print(cleanPrice)
+                # cleanPrice = re.search(price_match_regex, cleanPrice).group(1)
+                # print(cleanPrice)
                 shocks_tree.insert(parent='', index='end', iid=str(result), text='', values=results[result])
 
             print(num)
@@ -212,6 +244,9 @@ class Shock_Search(CTk):
 app = Shock_Search()
 app.mainloop()
 
+bilstein.cleanup()
+meyer.cleanup()
+turn14.cleanup()
 with open(filename, 'wb') as fav_parts:
     pickle.dump(fav_list, fav_parts)
 
