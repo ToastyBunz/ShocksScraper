@@ -14,6 +14,18 @@ from customtkinter import *
 import bilstein
 import meyer
 import turn14
+from dotenv import set_key
+
+tree_width = 150
+
+height_var = 50
+width_var = 60
+
+x_pad_1 = 5
+y_pad_1 = 10
+
+question_width = 400
+h_font = ('Helvetica', 15)
 
 bs_1 = '24-238304'
 bs_2 = '24-186728'
@@ -32,7 +44,7 @@ image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
 
 heart_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "white_heart.png")), size=(26, 26))
 unfave_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "heart_x.png")), size=(26, 26))
-excel_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "Excel-Logo.png")), size=(360, 136))
+excel_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "Excel-Logo-WEB.png")), size=(360, 136))
 
 try:
     with open(filename, 'rb+') as fav_parts:
@@ -74,14 +86,81 @@ def clipboard_link(tree, self):
 def open_product_link():
     messagebox.showerror(title='Missing Field ', message="No internet")
 
+def update_credentials(bil_l, bil_p, mey_l, mey_p, t14_l, t14_p):
+    envpath = os.path.abspath('.env')
+    new_creds = {'bilstein_user': bil_l, 'bilstein_pass': bil_p, 'meyer_user': mey_l,
+                 'meyer_pass': mey_p, 'turn14_user': t14_l, 'turn14_pass': t14_p }
 
-tree_width = 150
+    cred_tokens = {'bilstein_user': 'BILSTEIN_USER', 'bilstein_pass': 'BILSTEIN_PASS', 'meyer_user': 'MEYER_USER',
+                 'meyer_pass': 'MEYER_PASS', 'turn14_user': 'TURN14_USER', 'turn14_pass': 'TURN14_PASS'}
 
-height_var = 50
-width_var = 60
+    for key in new_creds:
+        if new_creds[key] == '':
+            pass
+        else:
+            print('replace', os.getenv(cred_tokens[key]), 'with', new_creds[key])
+            set_key(envpath, cred_tokens[key], new_creds[key])
 
-x_pad_1 = 5
-y_pad_1 = 10
+
+
+def combine_funcs(*funcs):
+    def inner_combined_func(*args, **kwargs):
+        for f in funcs:
+            f(*args, **kwargs)
+
+    return inner_combined_func
+
+def login_window():
+    window = CTkToplevel()
+    window.title("Credentials update")
+    window.geometry('1366x768')
+
+    # label = CTkLabel(window, text='Login Credentials', font=h_font)
+
+    bilstein_frame = CTkFrame(window, fg_color='transparent')
+    bilstein_label = CTkLabel(bilstein_frame, width=tree_width, text="Bilstein Credentials", font=h_font)
+    bilstein_user = CTkEntry(bilstein_frame, width=question_width, placeholder_text="Bilstein Username")
+    bilstein_pass = CTkEntry(bilstein_frame, width=question_width, placeholder_text="Bilstein Password")
+
+    bilstein_label.grid(row=0, column=0)
+    bilstein_user.grid(row=1, column=0)
+    bilstein_pass.grid(row=2, column=0)
+
+
+    meyer_frame = CTkFrame(window, fg_color='transparent')
+    meyer_label = CTkLabel(meyer_frame, width=tree_width, text="Meyer Credentials", font=h_font)
+    meyer_user = CTkEntry(meyer_frame, width=question_width, placeholder_text="Meyer Username")
+    meyer_pass = CTkEntry(meyer_frame, width=question_width, placeholder_text="Meyer Password")
+
+    meyer_label.grid(row=0, column=0)
+    meyer_user.grid(row=1, column=0)
+    meyer_pass.grid(row=2, column=0)
+
+
+    t14_frame = CTkFrame(window, fg_color='transparent')
+    t14_label = CTkLabel(t14_frame, width=tree_width, text="Turn14 Credentials", font=h_font)
+    t14_user = CTkEntry(t14_frame, width=question_width, placeholder_text="Turn14 Username")
+    t14_pass = CTkEntry(t14_frame, width=question_width, placeholder_text="Turn14 Password")
+
+    t14_label.grid(row=0, column=0)
+    t14_user.grid(row=1, column=0)
+    t14_pass.grid(row=2, column=0)
+
+
+    close_frame = CTkFrame(window, fg_color='transparent')
+    exit_button = CTkButton(close_frame, text='Cancel', width=100, command=lambda: window.destroy())
+    save_button = CTkButton(close_frame, text='Save', width=100,
+                     command= combine_funcs(lambda: update_credentials(bilstein_user.get(), bilstein_pass.get(), meyer_user.get(), meyer_pass.get(), t14_user.get(), t14_pass.get()), lambda: window.destroy()))
+
+    exit_button.grid(row=2, column=0, sticky='sw', pady=10, padx=(0, 720))
+    save_button.grid(row=2, column=2, sticky='se', pady=10, padx=(0, 0))
+
+    # label.pack()
+    bilstein_frame.pack(pady=60, padx=100)
+    meyer_frame.pack(pady=60, padx=100)
+    t14_frame.pack(pady=60, padx=100)
+    close_frame.pack(side=BOTTOM)
+
 
 
 class Shock_Search(CTk):
@@ -107,7 +186,7 @@ class Shock_Search(CTk):
         search_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
         search_frame.pack(pady=30)
 
-        combobox_var = StringVar(value="Search Part Number")
+        combobox_var = StringVar(value="")
 
         shocks_tree = ttk.Treeview(self)
 
@@ -186,14 +265,18 @@ class Shock_Search(CTk):
         link_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
         link_frame.pack()
 
+        credentials_button = CTkButton(link_frame, height=height_var, width=135, text='Update Credentials',
+        command=lambda: login_window())
+
         link_button = CTkButton(link_frame, height=height_var, width=60, text='Save link to clipboard',
                                 command=lambda: clipboard_link(shocks_tree, self))
 
         openpage_button = CTkButton(link_frame, height=height_var, width=60, text='Open Selected Webpage',
                                     command=lambda: open_product_link())
 
-        link_button.grid(row=0, column=0, padx=20, pady=20, sticky="e")
-        openpage_button.grid(row=0, column=1, padx=20, pady=20, sticky="e")
+        credentials_button.grid(row=0, column=0, padx=20, pady=20, sticky="e")
+        link_button.grid(row=0, column=1, padx=20, pady=20, sticky="e")
+        openpage_button.grid(row=0, column=2, padx=20, pady=20, sticky="e")
 
         # Theme frame
         theme_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
