@@ -87,6 +87,7 @@ def open_product_link():
     messagebox.showerror(title='Missing Field ', message="No internet")
 
 def update_credentials(bil_l, bil_p, mey_l, mey_p, t14_l, t14_p):
+    # updates .env file with items from the update credentials window
     envpath = os.path.abspath('.env')
     new_creds = {'bilstein_user': bil_l, 'bilstein_pass': bil_p, 'meyer_user': mey_l,
                  'meyer_pass': mey_p, 'turn14_user': t14_l, 'turn14_pass': t14_p }
@@ -104,6 +105,7 @@ def update_credentials(bil_l, bil_p, mey_l, mey_p, t14_l, t14_p):
 
 
 def combine_funcs(*funcs):
+    # Allows for multiple functions to be run by a single button
     def inner_combined_func(*args, **kwargs):
         for f in funcs:
             f(*args, **kwargs)
@@ -111,6 +113,7 @@ def combine_funcs(*funcs):
     return inner_combined_func
 
 def login_window():
+    # Window for updating Credentials
     window = CTkToplevel()
     window.title("Credentials update")
     window.geometry('1366x768')
@@ -122,9 +125,9 @@ def login_window():
     bilstein_user = CTkEntry(bilstein_frame, width=question_width, placeholder_text="Bilstein Username")
     bilstein_pass = CTkEntry(bilstein_frame, width=question_width, placeholder_text="Bilstein Password")
 
-    bilstein_label.grid(row=0, column=0)
-    bilstein_user.grid(row=1, column=0)
-    bilstein_pass.grid(row=2, column=0)
+    bilstein_label.grid(row=0, column=0, pady=y_pad_1)
+    bilstein_user.grid(row=1, column=0, pady=y_pad_1)
+    bilstein_pass.grid(row=2, column=0, pady=y_pad_1)
 
 
     meyer_frame = CTkFrame(window, fg_color='transparent')
@@ -132,9 +135,9 @@ def login_window():
     meyer_user = CTkEntry(meyer_frame, width=question_width, placeholder_text="Meyer Username")
     meyer_pass = CTkEntry(meyer_frame, width=question_width, placeholder_text="Meyer Password")
 
-    meyer_label.grid(row=0, column=0)
-    meyer_user.grid(row=1, column=0)
-    meyer_pass.grid(row=2, column=0)
+    meyer_label.grid(row=0, column=0, pady=y_pad_1)
+    meyer_user.grid(row=1, column=0, pady=y_pad_1)
+    meyer_pass.grid(row=2, column=0, pady=y_pad_1)
 
 
     t14_frame = CTkFrame(window, fg_color='transparent')
@@ -142,9 +145,9 @@ def login_window():
     t14_user = CTkEntry(t14_frame, width=question_width, placeholder_text="Turn14 Username")
     t14_pass = CTkEntry(t14_frame, width=question_width, placeholder_text="Turn14 Password")
 
-    t14_label.grid(row=0, column=0)
-    t14_user.grid(row=1, column=0)
-    t14_pass.grid(row=2, column=0)
+    t14_label.grid(row=0, column=0, pady=y_pad_1)
+    t14_user.grid(row=1, column=0, pady=y_pad_1)
+    t14_pass.grid(row=2, column=0, pady=y_pad_1)
 
 
     close_frame = CTkFrame(window, fg_color='transparent')
@@ -156,9 +159,9 @@ def login_window():
     save_button.grid(row=2, column=2, sticky='se', pady=10, padx=(0, 0))
 
     # label.pack()
-    bilstein_frame.pack(pady=60, padx=100)
-    meyer_frame.pack(pady=60, padx=100)
-    t14_frame.pack(pady=60, padx=100)
+    bilstein_frame.pack(pady=40, padx=100)
+    meyer_frame.pack(pady=20, padx=100)
+    t14_frame.pack(pady=40, padx=100)
     close_frame.pack(side=BOTTOM)
 
 
@@ -271,12 +274,12 @@ class Shock_Search(CTk):
         link_button = CTkButton(link_frame, height=height_var, width=60, text='Save link to clipboard',
                                 command=lambda: clipboard_link(shocks_tree, self))
 
-        openpage_button = CTkButton(link_frame, height=height_var, width=60, text='Open Selected Webpage',
-                                    command=lambda: open_product_link())
+        # openpage_button = CTkButton(link_frame, height=height_var, width=60, text='Open Selected Webpage',
+        #                             command=lambda: open_product_link())
 
         credentials_button.grid(row=0, column=0, padx=20, pady=20, sticky="e")
         link_button.grid(row=0, column=1, padx=20, pady=20, sticky="e")
-        openpage_button.grid(row=0, column=2, padx=20, pady=20, sticky="e")
+        # openpage_button.grid(row=0, column=2, padx=20, pady=20, sticky="e")
 
         # Theme frame
         theme_frame = CTkFrame(self, corner_radius=0, fg_color='transparent')
