@@ -42,7 +42,7 @@ print(re.search(price_match_regex, "$94.120000").group(1))
 
 favorites = [bs_1, bs_2, bs_3, ks_1, fs_1]
 
-# fav_list = []
+fav_list = []
 
 filename = 'Favorites.pk'
 
