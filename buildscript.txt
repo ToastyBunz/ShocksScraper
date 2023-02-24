@@ -1,0 +1,6 @@
+pyinstaller --noconfirm --onedir --console --icon "C:/Users/jashu/git/ShocksScraper/images/Excel-Logo.ico" \
+--add-data "C:/Users/jashu/git/ShocksScraper/Lib/site-packages/customtkinter;customtkinter/" \
+--add-data "C:/Users/jashu/git/ShocksScraper/Lib/site-packages/seleniumwire;seleniumwire/" \
+--add-data "C:/Users/jashu/git/ShocksScraper/images;images/" \
+--add-data "C:/Users/jashu/git/ShocksScraper/Lib/site-packages/certifi;certifi/"
+"C:/Users/jashu/git/ShocksScraper/S_Gui.py"

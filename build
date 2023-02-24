@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-pyinstaller --noconfirm --onedir --windowed --add-data "C:/Users/jashu/git/ShocksScraper/Lib/site-packages/customtkinter;customtkinter/" --add-data "C:/Users/jashu/git/ShocksScraper/images;images/"  "C:/Users/jashu/git/ShocksScraper/S_Gui.py"

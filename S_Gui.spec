@@ -8,7 +8,7 @@ a = Analysis(
     ['C:/Users/jashu/git/ShocksScraper/S_Gui.py'],
     pathex=[],
     binaries=[],
-    datas=[('C:/Users/jashu/git/ShocksScraper/Lib/site-packages/customtkinter', 'customtkinter/'), ('C:/Users/jashu/git/ShocksScraper/images', 'images/'), ('C:/Users/jashu/git/ShocksScraper/ca.crt', 'seleniumwire'), ('C:/Users/jashu/git/ShocksScraper/ca.key', 'seleniumwire')],
+    datas=[('C:/Users/jashu/git/ShocksScraper/Lib/site-packages/customtkinter', 'customtkinter/'), ('C:/Users/jashu/git/ShocksScraper/Lib/site-packages/seleniumwire', 'seleniumwire/'), ('C:/Users/jashu/git/ShocksScraper/images', 'images/'), ('C:/Users/jashu/git/ShocksScraper/Lib/site-packages/certifi', 'certifi/')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -31,12 +31,13 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['C:\\Users\\jashu\\git\\ShocksScraper\\images\\Excel-Logo.ico'],
 )
 coll = COLLECT(
     exe,
