@@ -8,7 +8,7 @@ a = Analysis(
     ['C:/Users/jashu/git/ShocksScraper/S_Gui.py'],
     pathex=[],
     binaries=[],
-    datas=[('C:/Users/jashu/git/ShocksScraper/Lib/site-packages/customtkinter', 'customtkinter/'), ('C:/Users/jashu/git/ShocksScraper/images', 'images/')],
+    datas=[('C:/Users/jashu/git/ShocksScraper/Lib/site-packages/customtkinter', 'customtkinter/'), ('C:/Users/jashu/git/ShocksScraper/images', 'images/'), ('C:/Users/jashu/git/ShocksScraper/ca.crt', 'seleniumwire'), ('C:/Users/jashu/git/ShocksScraper/ca.key', 'seleniumwire')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
